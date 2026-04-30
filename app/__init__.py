@@ -40,7 +40,7 @@ def create_app():
 
         #TODO: is userid a string or integer?
 
-        return User.query.get(int(user_id))
+        return User.query.get(user_id)
 
     # Register blueprints
     from app.routes.auth import auth_bp
