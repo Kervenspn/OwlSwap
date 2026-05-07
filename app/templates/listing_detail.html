@@ -93,7 +93,7 @@
           </a>
         {% elif current_user.is_authenticated and listing.user_id == current_user.id %}
           <div style="display:flex;gap:10px;">
-            <form method="POST" action="/listings/{{ listing.id }}/complete"
+            <form method="POST" action="/listing/{{ listing.id }}/complete"
                   onsubmit="return confirm('Mark this listing as completed?')"
                   style="flex:1">
               <button type="submit" class="btn-blue" style="width:100%;padding:12px;">
