@@ -86,7 +86,7 @@
         </div>
  
         {% if current_user.is_authenticated and listing.user_id != current_user.id %}
-          <a href="#">
+          <a href="javascript:void(0)" onclick="startConversation()">
             <button class="btn-blue" style="width:100%;padding:14px;font-size:15px;">
               💬 Message Seller
             </button>
@@ -145,3 +145,21 @@
     .listing-detail-img { width: 100%; height: 200px; }
   }
 </style>
+<script>
+  function startConversation() {
+    fetch('/conversation/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        listingID: "{{ listing.id }}",
+        otherUserID: "{{ listing.user_id }}"
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      window.location.href = '/messages';
+    })
+    .catch(err => console.error(err));
+  }
+</script>
+{% endblock %}

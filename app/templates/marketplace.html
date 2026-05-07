@@ -6,20 +6,22 @@
 
   <aside class="sidebar">
     <div class="sidebar-section">Browse</div>
-    <div class="sidebar-item active">
+    <div class="sidebar-item active" onclick="filterCategory('all', this)">
       <div class="sidebar-dot"></div>
       All Listings
     </div>
-    <div class="sidebar-item">Textbooks</div>
-    <div class="sidebar-item">Notes</div>
-    <div class="sidebar-item">Supplies</div>
+    <div class="sidebar-item" onclick="filterCategory('textbook', this)">Textbooks</div>
+    <div class="sidebar-item" onclick="filterCategory('notes', this)">Notes</div>
+    <div class="sidebar-item" onclick="filterCategory('supplies', this)">Supplies</div>
 
     <div class="sidebar-section">My Account</div>
-    <a href="#" class="sidebar-item">My Listings</a>
-    <a href="#" class="sidebar-item">Messages</a>
+    <a href="{{ url_for('my_listings') }}" class="sidebar-item">My Listings</a>
+    <a href="{{ url_for('messages_page') }}" class="sidebar-item">Messages</a>
 
     <div style="padding: 12px 20px;">
-      <a href="#"><button class="btn-blue" style="width:100%">+ New Listing</button></a>
+      <a href="{{ url_for('create_listing_page') }}">
+        <button class="btn-blue" style="width:100%">+ New Listing</button>
+      </a>
     </div>
   </aside>
 
@@ -29,51 +31,114 @@
       <span class="main-title">Marketplace</span>
       <div class="search-bar">
         <span>🔍</span>
-        <input type="text" placeholder="Search by title or author..." />
+        <input type="text" id="search-input" placeholder="Search by title or author..."
+               oninput="filterListings()" />
       </div>
     </div>
 
     <div class="tab-bar">
-      <div class="tab-item active">All</div>
-      <div class="tab-item">For Sale</div>
-      <div class="tab-item">Trade</div>
-      <div class="tab-item">Free</div>
+      <div class="tab-item active" onclick="filterPrice('all', this)">All</div>
+      <div class="tab-item" onclick="filterPrice('sell', this)">For Sale</div>
+      <div class="tab-item" onclick="filterPrice('trade', this)">Trade</div>
+      <div class="tab-item" onclick="filterPrice('free', this)">Free</div>
     </div>
 
-    <div class="card-grid">
+    <div class="card-grid" id="card-grid">
       {% if listings %}
         {% for listing in listings %}
-          <div class="listing-card">
-            <div class="listing-img">
-              {% if listing.images %}
-                <img src="{{ listing.images[0].image_url }}" alt="{{ listing.book.title if listing.book else 'Book' }}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" />
-              {% else %}
-                📚
-              {% endif %}
+          <a href="{{ url_for('listing_detail', listing_id=listing.id) }}"
+             style="text-decoration:none;"
+             class="listing-card-link"
+             data-title="{{ listing.book.title | lower if listing.book else '' }}"
+             data-author="{{ listing.book.author | lower if listing.book else '' }}"
+             data-condition="{{ listing.condition | lower if listing.condition else '' }}"
+             data-price="{{ 'free' if not listing.price else ('trade' if listing.price == 0 else 'sell') }}">
+            <div class="listing-card">
+              <div class="listing-img">
+                {% if listing.images %}
+                  <img src="{{ listing.images[0].image_url }}"
+                       alt="{{ listing.book.title if listing.book else 'Book' }}"
+                       style="width:100%;height:100%;object-fit:cover;border-radius:6px;" />
+                {% else %}
+                  📚
+                {% endif %}
+              </div>
+              <div class="listing-title">{{ listing.book.title if listing.book else 'Untitled' }}</div>
+              <div class="listing-course">{{ listing.book.author if listing.book else '' }}</div>
+              <div class="listing-footer">
+                <span class="listing-price">
+                  {% if listing.price %}${{ listing.price }}{% else %}Trade{% endif %}
+                </span>
+                <span class="badge badge-{{ listing.condition | lower if listing.condition else 'good' }}">
+                  {{ listing.condition if listing.condition else 'Good' }}
+                </span>
+              </div>
             </div>
-            <div class="listing-title">{{ listing.book.title if listing.book else 'Untitled' }}</div>
-            <div class="listing-course">{{ listing.book.author if listing.book else '' }}</div>
-            <div class="listing-footer">
-              <span class="listing-price">
-                {% if listing.price %}${{ listing.price }}{% else %}Trade{% endif %}
-              </span>
-              <span class="badge badge-{{ listing.condition | lower if listing.condition else 'good' }}">
-                {{ listing.condition if listing.condition else 'Good' }}
-              </span>
-            </div>
-          </div>
+          </a>
         {% endfor %}
       {% else %}
         <div class="empty-state">
           <div class="empty-state-icon">📭</div>
           <h3>No listings yet</h3>
           <p>Be the first to post a listing for your fellow Owls.</p>
-          <a href="#"><button class="btn-blue">+ Create Listing</button></a>
+          <a href="{{ url_for('create_listing_page') }}">
+            <button class="btn-blue">+ Create Listing</button>
+          </a>
         </div>
       {% endif %}
     </div>
 
-  </main>
+    <div id="no-results" style="display:none;text-align:center;padding:40px;color:#8896b3;grid-column:1/-1;">
+      <div style="font-size:36px;margin-bottom:12px;">🔍</div>
+      <div style="font-size:15px;font-weight:600;color:#4a5568;">No listings found</div>
+      <div style="font-size:13px;margin-top:4px;">Try a different search or filter</div>
+    </div>
 
+  </main>
 </div>
+
+<script>
+  let activeCategory = 'all';
+  let activePrice = 'all';
+
+  function filterCategory(category, el) {
+    activeCategory = category;
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    filterListings();
+  }
+
+  function filterPrice(price, el) {
+    activePrice = price;
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    filterListings();
+  }
+
+  function filterListings() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const cards = document.querySelectorAll('.listing-card-link');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const title    = card.dataset.title || '';
+      const author   = card.dataset.author || '';
+      const condition = card.dataset.condition || '';
+      const price    = card.dataset.price || '';
+
+      const matchSearch   = title.includes(search) || author.includes(search);
+      const matchCategory = activeCategory === 'all' || condition.includes(activeCategory);
+      const matchPrice    = activePrice === 'all' || price === activePrice;
+
+      if (matchSearch && matchCategory && matchPrice) {
+        card.style.display = 'block';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+</script>
 {% endblock %}
