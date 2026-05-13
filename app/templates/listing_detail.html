@@ -6,11 +6,10 @@
  
   <aside class="sidebar">
     <div class="sidebar-section">Browse</div>
-    <a href="{{ url_for('marketplace') }}" class="sidebar-item">
-      All Listings
-    </a>
+    <a href="{{ url_for('marketplace') }}" class="sidebar-item">All Listings</a>
     <div class="sidebar-section">My Account</div>
     <a href="{{ url_for('my_listings') }}" class="sidebar-item">My Listings</a>
+    <a href="{{ url_for('messages_page') }}" class="sidebar-item">Messages</a>
     <div style="padding: 12px 20px;">
       <a href="{{ url_for('create_listing_page') }}">
         <button class="btn-blue" style="width:100%">+ New Listing</button>
@@ -20,98 +19,141 @@
  
   <main class="main-content">
  
-    <!-- Back link -->
     <a href="{{ url_for('marketplace') }}"
-       style="font-size:13px;color:#1a3a6b;font-weight:500;display:inline-block;margin-bottom:20px;">
-      ← Back to Marketplace
+       style="font-size:13px;color:#1a3a6b;font-weight:500;
+              display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;">
+      &#8592; Back to Marketplace
     </a>
  
-    <div class="listing-detail-card">
+    <div style="background:white;border:1px solid #e4e9f2;border-radius:14px;
+                padding:32px;box-shadow:0 2px 16px rgba(26,58,107,0.08);">
  
-      <!-- Book image -->
-      <div class="listing-detail-img">
-        {% if listing.images %}
-          <img src="{{ listing.images[0].image_url }}"
-               alt="{{ listing.book.title if listing.book else 'Book' }}"
-               style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
-        {% else %}
-          <span style="font-size:72px;">📚</span>
-        {% endif %}
-      </div>
+      <div style="display:flex;gap:32px;flex-wrap:wrap;">
  
-      <!-- Book info -->
-      <div class="listing-detail-info">
- 
-        <div style="margin-bottom:6px;">
-          <span class="badge badge-{{ listing.condition | lower if listing.condition else 'good' }}">
-            {{ listing.condition if listing.condition else 'Good' }}
-          </span>
-          {% if listing.is_available %}
-            <span class="badge badge-new" style="margin-left:6px;">Available</span>
+        <!-- Book Image -->
+        <div style="width:240px;height:280px;background:#f0f3f9;border-radius:10px;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:72px;flex-shrink:0;overflow:hidden;">
+          {% if listing.images %}
+            <img src="{{ listing.images[0].image_url }}"
+                 alt="{{ listing.book.title if listing.book else 'Book' }}"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />
           {% else %}
-            <span class="badge badge-fair" style="margin-left:6px;">Sold</span>
+            &#128218;
           {% endif %}
         </div>
  
-        <h1 style="font-family:'Sora',sans-serif;font-size:24px;font-weight:700;
-                   color:#1e2535;margin-bottom:6px;line-height:1.3;">
-          {{ listing.book.title if listing.book else 'Unknown Title' }}
-        </h1>
+        <!-- Book Info -->
+        <div style="flex:1;min-width:240px;">
  
-        <p style="font-size:15px;color:#4a5568;margin-bottom:4px;">
-          by {{ listing.book.author if listing.book else 'Unknown Author' }}
-        </p>
- 
-        {% if listing.book and listing.book.edition %}
-          <p style="font-size:13px;color:#8896b3;margin-bottom:4px;">
-            Edition: {{ listing.book.edition }}
-          </p>
-        {% endif %}
- 
-        {% if listing.book and listing.book.year %}
-          <p style="font-size:13px;color:#8896b3;margin-bottom:20px;">
-            Year: {{ listing.book.year }}
-          </p>
-        {% endif %}
- 
-        <div style="font-size:32px;font-weight:800;color:#1a3a6b;margin-bottom:20px;">
-          {% if listing.price %}${{ listing.price }}{% else %}Trade{% endif %}
-        </div>
- 
-        <div style="border-top:1px solid #e4e9f2;padding-top:16px;margin-bottom:20px;">
-          <p style="font-size:13px;color:#8896b3;margin-bottom:4px;">Listed by</p>
-          <p style="font-size:15px;font-weight:600;color:#1e2535;">
-            {{ listing.owner.f_name }} {{ listing.owner.l_name }}
-          </p>
-        </div>
- 
-        {% if current_user.is_authenticated and listing.user_id != current_user.id %}
-          <a href="javascript:void(0)" onclick="startConversation()">
-            <button class="btn-blue" style="width:100%;padding:14px;font-size:15px;">
-              💬 Message Seller
-            </button>
-          </a>
-        {% elif current_user.is_authenticated and listing.user_id == current_user.id %}
-          <div style="display:flex;gap:10px;">
-            <form method="POST" action="/listing/{{ listing.id }}/complete"
-                  onsubmit="return confirm('Mark this listing as completed?')"
-                  style="flex:1">
-              <button type="submit" class="btn-blue" style="width:100%;padding:12px;">
-                ✓ Mark as Completed
-              </button>
-            </form>
+          <!-- Badges -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <span class="badge badge-{{ listing.condition | lower if listing.condition else 'good' }}">
+              {{ listing.condition if listing.condition else 'Good' }}
+            </span>
+            {% if listing.is_available %}
+              <span class="badge" style="background:#e1f5ee;color:#155f3e;">Available</span>
+            {% else %}
+              <span class="badge" style="background:#fff3e0;color:#e65100;">Sold</span>
+            {% endif %}
           </div>
-          <p style="font-size:12px;color:#8896b3;text-align:center;margin-top:8px;">
-            This is your listing
-          </p>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}">
-            <button class="btn-blue" style="width:100%;padding:14px;font-size:15px;">
-              Log in to Contact Seller
-            </button>
-          </a>
-        {% endif %}
  
+          <!-- Title -->
+          <h1 style="font-family:'Sora',sans-serif;font-size:24px;font-weight:700;
+                     color:#1e2535;margin-bottom:6px;line-height:1.3;">
+            {{ listing.book.title if listing.book else 'Unknown Title' }}
+          </h1>
+ 
+          <!-- Author -->
+          <p style="font-size:15px;color:#4a5568;margin-bottom:12px;">
+            by {{ listing.book.author if listing.book else 'Unknown Author' }}
+          </p>
+ 
+          <!-- Book Details -->
+          <div style="background:#f7f9fc;border-radius:8px;padding:14px;
+                      margin-bottom:16px;font-size:13px;color:#4a5568;">
+            {% if listing.book and listing.book.isbn %}
+              <div style="margin-bottom:6px;">
+                <span style="font-weight:600;color:#1a3a6b;">ISBN:</span>
+                {{ listing.book.isbn }}
+              </div>
+            {% endif %}
+            {% if listing.book and listing.book.edition %}
+              <div style="margin-bottom:6px;">
+                <span style="font-weight:600;color:#1a3a6b;">Edition:</span>
+                {{ listing.book.edition }}
+              </div>
+            {% endif %}
+            {% if listing.book and listing.book.year %}
+              <div>
+                <span style="font-weight:600;color:#1a3a6b;">Year:</span>
+                {{ listing.book.year }}
+              </div>
+            {% endif %}
+          </div>
+ 
+          <!-- Price -->
+          <div style="font-size:36px;font-weight:800;color:#1a3a6b;margin-bottom:16px;">
+            {% if listing.price %}${{ listing.price }}{% else %}Trade{% endif %}
+          </div>
+ 
+          <!-- Seller Info -->
+          <div style="border-top:1px solid #e4e9f2;padding-top:16px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:40px;height:40px;border-radius:50%;background:#1a3a6b;
+                          display:flex;align-items:center;justify-content:center;
+                          font-size:14px;font-weight:700;color:white;">
+                {{ listing.owner.f_name[:1].upper() }}{{ listing.owner.l_name[:1].upper() }}
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:#1e2535;">
+                  {{ listing.owner.f_name }} {{ listing.owner.l_name }}
+                </div>
+                <div style="font-size:12px;color:#8896b3;">
+                  Posted {{ listing.created_at.strftime('%B %d, %Y') if listing.created_at else 'Recently' }}
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Action Buttons -->
+          {% if current_user.is_authenticated and listing.user_id != current_user.id %}
+            {% if listing.is_available %}
+              <button onclick="startConversation()"
+                      class="btn-blue"
+                      style="width:100%;padding:14px;font-size:15px;">
+                &#128172; Message Seller
+              </button>
+            {% else %}
+              <button disabled
+                      style="width:100%;padding:14px;font-size:15px;background:#cdd4e4;
+                             color:#8896b3;border:none;border-radius:6px;cursor:not-allowed;">
+                This listing is no longer available
+              </button>
+            {% endif %}
+          {% elif current_user.is_authenticated and listing.user_id == current_user.id %}
+            <div style="display:flex;gap:10px;">
+              <form method="POST"
+                    action="{{ url_for('complete_listing', listing_id=listing.id) }}"
+                    style="flex:1"
+                    onsubmit="return confirm('Mark this listing as completed?')">
+                <button type="submit" class="btn-blue" style="width:100%;padding:12px;">
+                  &#10003; Mark as Completed
+                </button>
+              </form>
+            </div>
+            <p style="font-size:12px;color:#8896b3;text-align:center;margin-top:8px;">
+              This is your listing
+            </p>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">
+              <button class="btn-blue" style="width:100%;padding:14px;font-size:15px;">
+                Log in to Contact Seller
+              </button>
+            </a>
+          {% endif %}
+ 
+        </div>
       </div>
     </div>
  
@@ -119,32 +161,11 @@
 </div>
  
 <style>
-  .listing-detail-card {
-    display: flex;
-    gap: 32px;
-    background: white;
-    border: 1px solid #e4e9f2;
-    border-radius: 14px;
-    padding: 32px;
-    box-shadow: 0 2px 16px rgba(26,58,107,0.08);
-  }
-  .listing-detail-img {
-    width: 260px;
-    height: 300px;
-    background: #f0f3f9;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    overflow: hidden;
-  }
-  .listing-detail-info { flex: 1; }
   @media (max-width: 768px) {
-    .listing-detail-card { flex-direction: column; }
     .listing-detail-img { width: 100%; height: 200px; }
   }
 </style>
+ 
 <script>
   function startConversation() {
     fetch('/conversation/start', {

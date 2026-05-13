@@ -4,21 +4,23 @@
 {% block content %}
 <div class="marketplace-layout">
 
+  <!-- CLEAN SHORT SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-section">Browse</div>
-    <div class="sidebar-item active" onclick="filterCategory('all', this)">
+    <div class="sidebar-item active" id="sidebar-all"
+         onclick="filterCategory('all', this)">
       <div class="sidebar-dot"></div>
       All Listings
     </div>
-    <div class="sidebar-item" onclick="filterCategory('textbook', this)">Textbooks</div>
-    <div class="sidebar-item" onclick="filterCategory('notes', this)">Notes</div>
-    <div class="sidebar-item" onclick="filterCategory('supplies', this)">Supplies</div>
+    <div class="sidebar-item" onclick="filterCategory('new', this)">New</div>
+    <div class="sidebar-item" onclick="filterCategory('good', this)">Good</div>
+    <div class="sidebar-item" onclick="filterCategory('fair', this)">Fair</div>
 
     <div class="sidebar-section">My Account</div>
     <a href="{{ url_for('my_listings') }}" class="sidebar-item">My Listings</a>
     <a href="{{ url_for('messages_page') }}" class="sidebar-item">Messages</a>
 
-    <div style="padding: 12px 20px;">
+    <div style="padding:12px 20px;">
       <a href="{{ url_for('create_listing_page') }}">
         <button class="btn-blue" style="width:100%">+ New Listing</button>
       </a>
@@ -27,15 +29,82 @@
 
   <main class="main-content">
 
-    <div class="main-header">
-      <span class="main-title">Marketplace</span>
-      <div class="search-bar">
-        <span>🔍</span>
-        <input type="text" id="search-input" placeholder="Search by title or author..."
-               oninput="filterListings()" />
+    <!-- STATS BAR -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+      <div style="background:white;border:1px solid #e4e9f2;border-radius:10px;
+                  padding:16px 20px;display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;background:#eef2fa;border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;font-size:20px;">
+          &#128218;
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#1a3a6b;">{{ total_listings }}</div>
+          <div style="font-size:12px;color:#8896b3;">Total Listings</div>
+        </div>
+      </div>
+      <div style="background:white;border:1px solid #e4e9f2;border-radius:10px;
+                  padding:16px 20px;display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;background:#e1f5ee;border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;font-size:20px;">
+          &#10003;
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#1d9e75;">{{ available_listings }}</div>
+          <div style="font-size:12px;color:#8896b3;">Available Now</div>
+        </div>
+      </div>
+      <div style="background:white;border:1px solid #e4e9f2;border-radius:10px;
+                  padding:16px 20px;display:flex;align-items:center;gap:14px;">
+        <div style="width:40px;height:40px;background:#fef9e6;border-radius:8px;
+                    display:flex;align-items:center;justify-content:center;font-size:20px;">
+          &#128101;
+        </div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#d4a800;">{{ total_users }}</div>
+          <div style="font-size:12px;color:#8896b3;">Students Trading</div>
+        </div>
       </div>
     </div>
 
+    <!-- HEADER ROW -->
+    <div class="main-header">
+      <span class="main-title">Marketplace</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select id="sort-select" onchange="sortListings()"
+                style="border:1.5px solid #cdd4e4;border-radius:6px;padding:8px 12px;
+                       font-size:13px;font-family:'DM Sans',sans-serif;
+                       color:#1e2535;background:white;outline:none;">
+          <option value="newest">Newest First</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+        </select>
+        <div class="search-bar">
+          <span>&#128269;</span>
+          <input type="text" id="search-input"
+                 placeholder="Search title, author, or course..."
+                 oninput="filterListings()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- DEPARTMENT PILLS -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+      <button class="dept-pill active" onclick="filterDept('all', this)">All Departments</button>
+      <button class="dept-pill" onclick="filterDept('CS', this)">Computer Science</button>
+      <button class="dept-pill" onclick="filterDept('MTH', this)">Mathematics</button>
+      <button class="dept-pill" onclick="filterDept('BIO', this)">Biology</button>
+      <button class="dept-pill" onclick="filterDept('CHE', this)">Chemistry</button>
+      <button class="dept-pill" onclick="filterDept('PHY', this)">Physics</button>
+      <button class="dept-pill" onclick="filterDept('PSY', this)">Psychology</button>
+      <button class="dept-pill" onclick="filterDept('SOC', this)">Sociology</button>
+      <button class="dept-pill" onclick="filterDept('ENG', this)">English</button>
+      <button class="dept-pill" onclick="filterDept('HIS', this)">History</button>
+      <button class="dept-pill" onclick="filterDept('BUS', this)">Business</button>
+      <button class="dept-pill" onclick="filterDept('NUR', this)">Nursing</button>
+      <button class="dept-pill" onclick="filterDept('EDU', this)">Education</button>
+    </div>
+
+    <!-- TABS -->
     <div class="tab-bar">
       <div class="tab-item active" onclick="filterPrice('all', this)">All</div>
       <div class="tab-item" onclick="filterPrice('sell', this)">For Sale</div>
@@ -43,6 +112,7 @@
       <div class="tab-item" onclick="filterPrice('free', this)">Free</div>
     </div>
 
+    <!-- CARDS -->
     <div class="card-grid" id="card-grid">
       {% if listings %}
         {% for listing in listings %}
@@ -51,20 +121,29 @@
              class="listing-card-link"
              data-title="{{ listing.book.title | lower if listing.book else '' }}"
              data-author="{{ listing.book.author | lower if listing.book else '' }}"
+             data-course="{{ listing.course | lower if listing.course else '' }}"
              data-condition="{{ listing.condition | lower if listing.condition else '' }}"
-             data-price="{{ 'free' if not listing.price else ('trade' if listing.price == 0 else 'sell') }}">
+             data-course-prefix="{{ listing.course.split()[0] | upper if listing.course else '' }}"
+             data-price-val="{{ listing.price if listing.price else 0 }}"
+             data-price-type="{{ 'free' if not listing.price else 'sell' }}">
             <div class="listing-card">
-              <div class="listing-img">
-                {% if listing.images %}
-                  <img src="{{ listing.images[0].image_url }}"
-                       alt="{{ listing.book.title if listing.book else 'Book' }}"
-                       style="width:100%;height:100%;object-fit:cover;border-radius:6px;" />
-                {% else %}
-                  📚
-                {% endif %}
+              <div class="listing-img">&#128218;</div>
+              {% if listing.course %}
+                <div style="display:inline-block;background:#eef2fa;color:#1a3a6b;
+                            font-size:10px;font-weight:700;padding:2px 8px;
+                            border-radius:4px;margin-bottom:6px;">
+                  {{ listing.course }}
+                </div>
+              {% endif %}
+              <div class="listing-title">
+                {{ listing.book.title if listing.book else 'Untitled' }}
               </div>
-              <div class="listing-title">{{ listing.book.title if listing.book else 'Untitled' }}</div>
-              <div class="listing-course">{{ listing.book.author if listing.book else '' }}</div>
+              <div style="font-size:11px;color:#8896b3;margin-bottom:4px;">
+                by {{ listing.book.author if listing.book else 'Unknown' }}
+              </div>
+              <div style="font-size:11px;color:#1a3a6b;font-weight:500;margin-bottom:8px;">
+                {{ listing.owner.f_name }} {{ listing.owner.l_name }}
+              </div>
               <div class="listing-footer">
                 <span class="listing-price">
                   {% if listing.price %}${{ listing.price }}{% else %}Trade{% endif %}
@@ -78,7 +157,7 @@
         {% endfor %}
       {% else %}
         <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-icon">&#128219;</div>
           <h3>No listings yet</h3>
           <p>Be the first to post a listing for your fellow Owls.</p>
           <a href="{{ url_for('create_listing_page') }}">
@@ -88,8 +167,9 @@
       {% endif %}
     </div>
 
-    <div id="no-results" style="display:none;text-align:center;padding:40px;color:#8896b3;grid-column:1/-1;">
-      <div style="font-size:36px;margin-bottom:12px;">🔍</div>
+    <div id="no-results"
+         style="display:none;text-align:center;padding:40px;color:#8896b3;">
+      <div style="font-size:36px;margin-bottom:12px;">&#128269;</div>
       <div style="font-size:15px;font-weight:600;color:#4a5568;">No listings found</div>
       <div style="font-size:13px;margin-top:4px;">Try a different search or filter</div>
     </div>
@@ -97,13 +177,45 @@
   </main>
 </div>
 
+<style>
+  .dept-pill {
+    background: white;
+    border: 1.5px solid #e4e9f2;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .dept-pill:hover {
+    border-color: #1a3a6b;
+    color: #1a3a6b;
+  }
+  .dept-pill.active {
+    background: #1a3a6b;
+    border-color: #1a3a6b;
+    color: white;
+  }
+</style>
+
 <script>
   let activeCategory = 'all';
-  let activePrice = 'all';
+  let activePrice    = 'all';
+  let activeDept     = 'all';
 
   function filterCategory(category, el) {
     activeCategory = category;
     document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    filterListings();
+  }
+
+  function filterDept(dept, el) {
+    activeDept = dept;
+    document.querySelectorAll('.dept-pill').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
     filterListings();
   }
@@ -117,20 +229,23 @@
 
   function filterListings() {
     const search = document.getElementById('search-input').value.toLowerCase();
-    const cards = document.querySelectorAll('.listing-card-link');
+    const cards  = document.querySelectorAll('.listing-card-link');
     let visibleCount = 0;
 
     cards.forEach(card => {
-      const title    = card.dataset.title || '';
-      const author   = card.dataset.author || '';
+      const title     = card.dataset.title || '';
+      const author    = card.dataset.author || '';
+      const course    = card.dataset.course || '';
       const condition = card.dataset.condition || '';
-      const price    = card.dataset.price || '';
+      const prefix    = card.dataset.coursePrefix || '';
+      const priceType = card.dataset.priceType || '';
 
-      const matchSearch   = title.includes(search) || author.includes(search);
-      const matchCategory = activeCategory === 'all' || condition.includes(activeCategory);
-      const matchPrice    = activePrice === 'all' || price === activePrice;
+      const matchSearch   = title.includes(search) || author.includes(search) || course.includes(search);
+      const matchCategory = activeCategory === 'all' || condition === activeCategory;
+      const matchPrice    = activePrice === 'all' || priceType === activePrice;
+      const matchDept     = activeDept === 'all' || prefix === activeDept;
 
-      if (matchSearch && matchCategory && matchPrice) {
+      if (matchSearch && matchCategory && matchPrice && matchDept) {
         card.style.display = 'block';
         visibleCount++;
       } else {
@@ -138,7 +253,20 @@
       }
     });
 
-    document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+    document.getElementById('no-results').style.display =
+      visibleCount === 0 ? 'block' : 'none';
+  }
+
+  function sortListings() {
+    const sort  = document.getElementById('sort-select').value;
+    const grid  = document.getElementById('card-grid');
+    const cards = Array.from(document.querySelectorAll('.listing-card-link'));
+    cards.sort((a, b) => {
+      if (sort === 'price-low')  return parseFloat(a.dataset.priceVal) - parseFloat(b.dataset.priceVal);
+      if (sort === 'price-high') return parseFloat(b.dataset.priceVal) - parseFloat(a.dataset.priceVal);
+      return 0;
+    });
+    cards.forEach(card => grid.appendChild(card));
   }
 </script>
 {% endblock %}

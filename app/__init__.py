@@ -42,9 +42,15 @@ def create_app():
     @app.route("/marketplace")
     @login_required
     def marketplace():
-        from models import Listing
+        from models import Listing, User
         listings = Listing.query.filter_by(is_available=True).all()
-        return render_template("marketplace.html", listings=listings)
+        total = Listing.query.count()
+        available = Listing.query.filter_by(is_available=True).count()
+        users = User.query.count()
+        return render_template("marketplace.html", listings=listings,
+                               total_listings=total,
+                               available_listings=available,
+                               total_users=users)
 
     @app.route("/listing/<listing_id>")
     @login_required
@@ -129,6 +135,20 @@ def create_app():
         ).all()
         return render_template("messages.html", conversations=conversations)
     
+    @app.route("/profile")
+    @login_required
+    def profile_page():
+        from models import Listing
+        listings = Listing.query.filter_by(user_id=current_user.id).all()
+        total = len(listings)
+        active = len([l for l in listings if l.is_available])
+        completed = len([l for l in listings if not l.is_available])
+        return render_template("profile.html", user=current_user,
+                               listings=listings,
+                               total_listings=total,
+                               active_listings=active,
+                               completed_listings=completed)
+
     @app.route("/profile")
     @login_required
     def profile_page():
