@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}OwlSwap — Page Not Found{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 60px);display:flex;align-items:center;
+            justify-content:center;background:#f7f9fc;padding:40px 20px;">
+  <div style="text-align:center;max-width:480px;">
+
+    <div style="font-size:80px;margin-bottom:16px;">&#129417;</div>
+
+    <h1 style="font-family:'Sora',sans-serif;font-size:32px;font-weight:800;
+               color:#1a3a6b;margin-bottom:8px;">
+      404 — Page Not Found
+    </h1>
+
+    <p style="font-size:15px;color:#8896b3;line-height:1.7;margin-bottom:32px;">
+      Looks like this page flew away. The listing may have been removed or the URL might be incorrect.
+    </p>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{{ url_for('marketplace') }}">
+        <button class="btn-blue" style="padding:12px 24px;font-size:14px;">
+          Browse Marketplace
+        </button>
+      </a>
+      <a href="{{ url_for('landing') }}">
+        <button style="background:white;border:1.5px solid #cdd4e4;border-radius:6px;
+                       padding:12px 24px;font-size:14px;color:#4a5568;cursor:pointer;
+                       font-family:'DM Sans',sans-serif;">
+          Go Home
+        </button>
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
