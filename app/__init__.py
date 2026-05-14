@@ -13,6 +13,11 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+COURSE_SUBJECTS = [
+    "CSC", "MTH", "BIO", "CHE", "PHY",
+    "ENG", "HIS", "PSY", "NUR", "BUS",
+    "ART", "SOC", "ECO", "PHL", "COM"
+]
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -86,7 +91,10 @@ def create_app():
             year      = request.form.get("year", "").strip()
             condition = request.form.get("condition", "").strip()
             price     = request.form.get("price", "").strip()
-            course    = request.form.get("course", "").strip()
+            selected_courses = request.form.getlist("course_subjects")
+            course_string = ",".join(selected_courses)
+            
+            genre     = request.form.get("genre", "").strip()
             image     = request.files.get("image")
 
             if not title or not condition:
@@ -111,10 +119,10 @@ def create_app():
                 listing = Listing(
                     id=str(uuid.uuid4())[:20],
                     user_id=current_user.id,
-                    book_isbn=isbn,
+                    book_isbn=book.isbn,
                     condition=condition,
+                    course=course_string or None,
                     price=float(price) if price else None,
-                    course=course,
                     is_available=True
                 )
                 db.session.add(listing)
@@ -137,7 +145,9 @@ def create_app():
                 flash(f"Failed to create listing: {e}", "error")
                 return redirect(url_for("create_listing_page"))
 
-        return render_template("create_listing.html")
+        return render_template("create_listing.html",
+                               course_subjects=COURSE_SUBJECTS)
+    
 
     @app.route("/my-listings")
     @login_required

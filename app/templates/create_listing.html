@@ -104,6 +104,24 @@
                 <option value="FAIR" {% if request.form.get('condition') == 'FAIR' %}selected{% endif %}>Fair</option>
               </select>
             </div>
+              <div class="field">
+    <label>Course Subjects</label>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+            {% for subject in course_subjects %}
+              <label style="display:flex;align-items:center;gap:6px;
+                            background:#f5f7fb;border:1px solid #dbe3f0;
+                            border-radius:999px;padding:8px 14px;
+                            font-size:13px;color:#1e2535;cursor:pointer;">
+                <input
+                  type="checkbox"
+                  name="course_subjects"
+                  value="{{ subject }}"
+                />
+                {{ subject }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
 
             <div class="field">
               <label for="price">Price (leave blank if trade only)</label>

@@ -55,7 +55,17 @@
               <span class="badge" style="background:#e1f5ee;color:#155f3e;">Available</span>
             {% else %}
               <span class="badge" style="background:#fff3e0;color:#e65100;">Sold</span>
-            {% endif %}
+              {% endif %}
+                {% if listing.course %}
+              {% for subject in listing.course.split(',') %}
+              <span class="badge"
+                style="background:#e8f0ff;
+                      color:#1a3a6b;
+                      border:1px solid #cddaf7;">
+                {{ subject }}
+            </span>
+            {% endfor %}
+              {% endif %}
           </div>
  
           <!-- Title -->
