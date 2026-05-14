@@ -47,6 +47,10 @@ def create_app():
     from app.routes.chat import chat
     app.register_blueprint(chat, url_prefix="")
 
+    from app.routes.delete_account import delete_bp
+    app.register_blueprint(delete_bp)
+
+
     @app.route("/")
     def landing():
         return render_template("landing.html")
