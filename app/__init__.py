@@ -13,6 +13,11 @@ cloudinary.config(
     api_key=os.getenv("CLOUDINARY_API_KEY"),
     api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
+COURSE_SUBJECTS = [
+    "CSC", "MTH", "BIO", "CHE", "PHY",
+    "ENG", "HIS", "PSY", "NUR", "BUS",
+    "ART", "SOC", "ECO", "PHL", "COM"
+]
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -41,6 +46,10 @@ def create_app():
 
     from app.routes.chat import chat
     app.register_blueprint(chat, url_prefix="")
+
+    from app.routes.delete_account import delete_bp
+    app.register_blueprint(delete_bp)
+
 
     @app.route("/")
     def landing():
@@ -88,6 +97,9 @@ def create_app():
             price     = request.form.get("price", "").strip()
             course        = request.form.get("course", "").strip()
             listing_type  = request.form.get("listing_type", "sell").strip()
+            selected_courses = request.form.getlist("course_subjects")
+            course_string = ",".join(selected_courses) if selected_courses else course
+            genre         = request.form.get("genre", "").strip()
             image     = request.files.get("image")
 
             if not title or not condition:
@@ -112,10 +124,10 @@ def create_app():
                 listing = Listing(
                     id=str(uuid.uuid4())[:20],
                     user_id=current_user.id,
-                    book_isbn=isbn,
+                    book_isbn=book.isbn,
                     condition=condition,
+                    course=course_string or course or None,
                     price=float(price) if price else None,
-                    course=course,
                     listing_type=listing_type,
                     is_available=True
                 )
@@ -139,7 +151,9 @@ def create_app():
                 flash(f"Failed to create listing: {e}", "error")
                 return redirect(url_for("create_listing_page"))
 
-        return render_template("create_listing.html")
+        return render_template("create_listing.html",
+                               course_subjects=COURSE_SUBJECTS)
+    
 
     @app.route("/my-listings")
     @login_required
@@ -182,6 +196,33 @@ def create_app():
                                total_listings=total,
                                active_listings=active,
                                completed_listings=completed)
+    
+    @app.route("/users/<user_id>/reviews")
+    @login_required
+    def user_reviews(user_id):
+        from models import User, Review
+
+        user = User.query.get_or_404(user_id)
+
+        role = request.args.get("role")
+
+        reviews_query = Review.query.filter_by(
+            reviewed_user_id=user.id
+        )
+
+        if role in ["buyer", "seller"]:
+            reviews_query = reviews_query.filter_by(role=role)
+
+        reviews = reviews_query.order_by(
+            Review.created_at.desc()
+        ).all()
+
+        return render_template(
+            "user_reviews.html",
+            user=user,
+            reviews=reviews,
+            role=role
+        )
 
 
     @app.route("/listing/<listing_id>/delete", methods=["POST"])

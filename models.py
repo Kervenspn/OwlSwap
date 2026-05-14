@@ -15,7 +15,9 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     book_interests = db.Column(db.Text, nullable=True)   
     rating = db.Column(db.Numeric(3, 2), nullable=True)  
-    rating_count = db.Column(db.Integer, default=0)         
+    rating_count = db.Column(db.Integer, default=0) 
+    is_deleted = db.Column(db.Boolean, default=False)
+
 
     listings = db.relationship(
         "Listing", backref="owner", lazy=True, cascade="all, delete-orphan"
@@ -28,6 +30,23 @@ class User(db.Model, UserMixin):
         "Message", foreign_keys="Message.receiver_id",
         backref="receiver", lazy=True, cascade="all, delete-orphan"
     )
+    reviews_written = db.relationship(
+    "Review",
+    foreign_keys="Review.reviewer_id",
+    backref="review_author",
+    lazy=True)
+    
+    @property
+    def average_rating(self):
+        reviews = self.reviews_received
+
+        if not reviews:
+            return None
+
+        return round(
+            sum(r.rating for r in reviews) / len(reviews),
+            1
+        )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -61,7 +80,14 @@ class Listing(db.Model):
     condition = db.Column(db.String(50))
     listing_type = db.Column(db.String(20), default="sell")
     course = db.Column(db.String(50))
+
+    genre = db.Column(db.String(50), nullable=True)
     price = db.Column(db.Numeric(10, 2), nullable=True)
+    condition = db.Column(db.String(50))
+    listing_type = db.Column(db.String(20), default="sell")
+    course = db.Column(db.String(50), nullable=True)
+    genre = db.Column(db.String(50), nullable=True)
+
     is_available = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -107,3 +133,41 @@ class Conversation(db.Model):
     user1 = db.relationship("User", foreign_keys=[user1_id], backref="conversations_as_user1")
     user2 = db.relationship("User", foreign_keys=[user2_id], backref="conversations_as_user2")
     listing = db.relationship("Listing", backref="conversations")
+
+class Review(db.Model):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.String(20), primary_key=True)
+    reviewer_id = db.Column(
+        db.String(20),
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+    reviewed_user_id = db.Column(
+        db.String(20),
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+    conversation_id = db.Column(
+        db.Integer,
+        db.ForeignKey("conversations.id"),
+        nullable=False
+    )
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+
+    # buyer or seller
+    role = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+    reviewer = db.relationship(
+        "User",
+        foreign_keys=[reviewer_id]
+    )
+    reviewed_user = db.relationship(
+        "User",
+        foreign_keys=[reviewed_user_id],
+        backref="reviews_received"
+    )
