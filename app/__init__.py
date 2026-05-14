@@ -94,10 +94,11 @@ def create_app():
             year      = request.form.get("year", "").strip()
             condition = request.form.get("condition", "").strip()
             price     = request.form.get("price", "").strip()
+            course        = request.form.get("course", "").strip()
+            listing_type  = request.form.get("listing_type", "sell").strip()
             selected_courses = request.form.getlist("course_subjects")
-            course_string = ",".join(selected_courses)
-            
-            genre     = request.form.get("genre", "").strip()
+            course_string = ",".join(selected_courses) if selected_courses else course
+            genre         = request.form.get("genre", "").strip()
             image     = request.files.get("image")
 
             if not title or not condition:
@@ -124,8 +125,9 @@ def create_app():
                     user_id=current_user.id,
                     book_isbn=book.isbn,
                     condition=condition,
-                    course=course_string or None,
+                    course=course_string or course or None,
                     price=float(price) if price else None,
+                    listing_type=listing_type,
                     is_available=True
                 )
                 db.session.add(listing)

@@ -88,7 +88,7 @@
              data-condition="{{ listing.condition | lower if listing.condition else '' }}"
              data-course-prefix="{{ listing.course.split()[0] | upper if listing.course else '' }}"
              data-price-val="{{ listing.price if listing.price else 0 }}"
-             data-price-type="{{ 'free' if not listing.price else 'sell' }}">
+             data-price-type="{{ listing.listing_type if listing.listing_type else ('free' if not listing.price else 'sell') }}">
             <div class="listing-card">
               <div class="listing-img">
                 {% if listing.images %}
