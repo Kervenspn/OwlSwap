@@ -15,7 +15,9 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     book_interests = db.Column(db.Text, nullable=True)   
     rating = db.Column(db.Numeric(3, 2), nullable=True)  
-    rating_count = db.Column(db.Integer, default=0)         
+    rating_count = db.Column(db.Integer, default=0) 
+    is_deleted = db.Column(db.Boolean, default=False)
+
 
     listings = db.relationship(
         "Listing", backref="owner", lazy=True, cascade="all, delete-orphan"

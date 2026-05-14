@@ -38,10 +38,18 @@
                  onmouseout="this.style.background='white'">
               <div style="font-size:13px;font-weight:600;color:#1e2535;margin-bottom:2px;">
                 {% if convo.user1_id == current_user.id %}
-                  {{ convo.user2.f_name }} {{ convo.user2.l_name }}
+                  {% set other = convo.user2 %}
                 {% else %}
-                  {{ convo.user1.f_name }} {{ convo.user1.l_name }}
+                  {% set other = convo.user1 %}
                 {% endif %}
+                {% if other is none %}
+                  Deleted user
+                {% elif other.is_deleted %}
+                  Deleted user
+                {% else %}
+                  {{ other.f_name }} {{ other.l_name}}
+                {% endif %}
+
               </div>
               <div style="font-size:11px;color:#8896b3;">
                 Re: {{ convo.listing.book.title if convo.listing and convo.listing.book else 'Listing' }}
