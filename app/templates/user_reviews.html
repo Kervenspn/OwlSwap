@@ -7,6 +7,18 @@
 <body style="background:#f4f7fb;font-family:'DM Sans',Arial,sans-serif;">
 
 <div style="max-width:920px;margin:40px auto;padding:0 20px;">
+    <a href="{{ request.referrer or url_for('marketplace') }}"
+   style="
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:18px;
+      text-decoration:none;
+      color:#1a3a6b;
+      font-weight:700;
+      font-size:14px;">
+  ← Back
+</a>
 
   <!-- Header Card -->
   <div style="
@@ -48,49 +60,7 @@
     </div>
   </div>
 
-  <!-- Filter Buttons -->
-  <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
-
-    <a href="{{ url_for('user_reviews', user_id=user.id) }}"
-       style="
-        padding:11px 18px;
-        border-radius:999px;
-        text-decoration:none;
-        background:#1a3a6b;
-        color:white;
-        font-weight:600;
-        font-size:14px;
-        box-shadow:0 2px 8px rgba(26,58,107,0.18);">
-      All Reviews
-    </a>
-
-    <a href="{{ url_for('user_reviews', user_id=user.id, role='buyer') }}"
-       style="
-        padding:11px 18px;
-        border-radius:999px;
-        text-decoration:none;
-        background:white;
-        border:1px solid #d9e1ef;
-        color:#1e2535;
-        font-weight:600;
-        font-size:14px;">
-      Buyer Reviews
-    </a>
-
-    <a href="{{ url_for('user_reviews', user_id=user.id, role='seller') }}"
-       style="
-        padding:11px 18px;
-        border-radius:999px;
-        text-decoration:none;
-        background:white;
-        border:1px solid #d9e1ef;
-        color:#1e2535;
-        font-weight:600;
-        font-size:14px;">
-      Seller Reviews
-    </a>
-
-  </div>
+x
 
   <!-- Reviews -->
   {% for review in reviews %}
@@ -124,13 +94,6 @@
           ⭐ {{ review.rating }}/5
         </div>
 
-        <div style="
-            font-size:13px;
-            font-weight:600;
-            color:#6b7892;
-            text-transform:capitalize;">
-          {{ review.role }} Review
-        </div>
       </div>
 
       {% if review.comment %}

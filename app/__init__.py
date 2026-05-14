@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 load_dotenv()
-
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_required, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -180,6 +179,55 @@ def create_app():
             (Conversation.user2_id == current_user.id)
         ).all()
         return render_template("messages.html", conversations=conversations)
+    
+    @app.route("/conversation/<int:conversation_id>/review", methods=["POST"])
+    @login_required
+    def submit_review(conversation_id):
+        from models import Conversation, Review
+        import uuid
+
+        conversation = Conversation.query.get_or_404(conversation_id)
+
+        if current_user.id not in [conversation.user1_id, conversation.user2_id]:
+            return {"error": "Not allowed"}, 403
+
+        reviewed_user_id = (
+            conversation.user2_id
+            if current_user.id == conversation.user1_id
+            else conversation.user1_id
+        )
+
+        data = request.get_json()
+        rating = int(data.get("rating"))
+        comment = data.get("comment", "").strip()
+
+        if rating < 1 or rating > 5:
+            return {"error": "Rating must be between 1 and 5"}, 400
+
+        existing_review = Review.query.filter_by(
+            reviewer_id=current_user.id,
+            reviewed_user_id=reviewed_user_id,
+            conversation_id=conversation.id
+        ).first()
+
+        if existing_review:
+            existing_review.rating = rating
+            existing_review.comment = comment
+        else:
+            review = Review(
+                id=str(uuid.uuid4())[:20],
+                reviewer_id=current_user.id,
+                reviewed_user_id=reviewed_user_id,
+                conversation_id=conversation.id,
+                rating=rating,
+                comment=comment,
+                role="user"
+            )
+            db.session.add(review)
+
+        db.session.commit()
+
+        return {"message": "Review submitted successfully"}
 
     @app.route("/profile")
     @login_required
@@ -202,16 +250,9 @@ def create_app():
 
         user = User.query.get_or_404(user_id)
 
-        role = request.args.get("role")
-
-        reviews_query = Review.query.filter_by(
+        reviews = Review.query.filter_by(
             reviewed_user_id=user.id
-        )
-
-        if role in ["buyer", "seller"]:
-            reviews_query = reviews_query.filter_by(role=role)
-
-        reviews = reviews_query.order_by(
+        ).order_by(
             Review.created_at.desc()
         ).all()
 
@@ -219,7 +260,6 @@ def create_app():
             "user_reviews.html",
             user=user,
             reviews=reviews,
-            role=role
         )
 
 
