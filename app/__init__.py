@@ -86,7 +86,8 @@ def create_app():
             year      = request.form.get("year", "").strip()
             condition = request.form.get("condition", "").strip()
             price     = request.form.get("price", "").strip()
-            course    = request.form.get("course", "").strip()
+            course        = request.form.get("course", "").strip()
+            listing_type  = request.form.get("listing_type", "sell").strip()
             image     = request.files.get("image")
 
             if not title or not condition:
@@ -115,6 +116,7 @@ def create_app():
                     condition=condition,
                     price=float(price) if price else None,
                     course=course,
+                    listing_type=listing_type,
                     is_available=True
                 )
                 db.session.add(listing)

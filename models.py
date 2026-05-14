@@ -59,6 +59,7 @@ class Listing(db.Model):
     user_id = db.Column(db.String(20), db.ForeignKey("users.id"), nullable=False)
     book_isbn = db.Column(db.String(20), db.ForeignKey("books.isbn"), nullable=False)
     condition = db.Column(db.String(50))
+    listing_type = db.Column(db.String(20), default="sell")
     course = db.Column(db.String(50))
     price = db.Column(db.Numeric(10, 2), nullable=True)
     is_available = db.Column(db.Boolean, default=True)
